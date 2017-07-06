@@ -65,6 +65,14 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   return result;
 }
 
+void print_vector(std::vector<double> v){
+  for(auto i = v.begin(); i!=v.end(); i++){
+    std::cout << *i << ' ';
+  }
+  std::cout << endl;
+  
+}
+
 int main() {
   uWS::Hub h;
 
@@ -98,6 +106,24 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
+          /*
+          //Print recieved messages
+          std::cout << "{px, py, psi, vel} " << std::endl;
+          std::cout << px << "\t" << py <<"\t" << psi << "\t" << v << endl;
+          print_vector(ptsx);
+          print_vector(ptsy);
+          */
+          vector<double> waypoints_x;
+          vector<double> waypoints_y;
+          //Assuming both points have equal lenght!
+          //Convert global coords to local coords
+          for(int i = 0; i<ptsx.size(); i++){
+            double diff_x = ptsx[i]-px;
+            double diff_y = ptsy[i]-py;
+            waypoints_x.push_back(diff_x*cos(-psi) - diff_x*sin(-psi));
+            waypoints_y.push_back(diff_x*sin(-psi) - diff_x*cos(-psi));
+          }
+
           double steer_value;
           double throttle_value;
 
@@ -127,6 +153,8 @@ int main() {
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
 
+          msgJson["next_x"] = waypoints_x;
+          msgJson["next_y"] = waypoints_y;
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
