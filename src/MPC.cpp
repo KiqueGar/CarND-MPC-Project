@@ -8,7 +8,7 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-// Using 1.5 seconds
+// Using 1.0 seconds
 size_t N = 10;
 double dt = .1;
 
@@ -24,7 +24,7 @@ double dt = .1;
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
 // Speed setpoint 50mph
-double ref_v = 80;
+double ref_v = 70;
 // Quick indices
 size_t x_start = 0;
 size_t y_start = x_start + N;

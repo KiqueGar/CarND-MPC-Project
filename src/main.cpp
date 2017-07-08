@@ -70,7 +70,6 @@ void print_vector(std::vector<double> v){
     std::cout << *i << ' ';
   }
   std::cout << endl;
-  
 }
 
 int main() {
@@ -105,13 +104,6 @@ int main() {
           *
           * Both are in between [-1, 1].
           *
-          */
-          /*
-          //Print recieved messages
-          std::cout << "{px, py, psi, vel} " << std::endl;
-          std::cout << px << "\t" << py <<"\t" << psi << "\t" << v << endl;
-          print_vector(ptsx);
-          print_vector(ptsy);
           */
           vector<double> waypoints_x;
           vector<double> waypoints_y;

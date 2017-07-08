@@ -15,7 +15,12 @@ The kinematic model of the vehicle includes the position, orientation, speed,
 cross track error see the following equations:
 ![equations](equations.png)
 
-Important to note that actuators are taken into acount for a next step
+Important to note:
+
+- Actuators are taken into acount for a next step.
+- The equations are for car position, hence, global position (as delivered by
+simulator) must be converted
+
 Cost functions were tunned based on the following criteria (Most important first):
 
 - Cross Track Error (CTE)
