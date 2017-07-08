@@ -1,6 +1,39 @@
 # CarND-Controls-MPC
 Self-Driving Car Engineer Nanodegree Program
+---
+## Introduction
+The objective was to implement Model Predictive Control on a simulator. The 
+simulator provides information about the state of the car (speed, trhotle,
+global position) as well as waypoints around the track. The car takes as
+arguments the actuator values for steering and acceleration. The car must
+complete a lap around the track safely
 
+---
+
+### Model Description
+The kinematic model of the vehicle includes the position, orientation, speed,
+cross track error see the following equations:
+![equations](equations.png)
+
+Important to note that actuators are taken into acount for a next step
+Cost functions were tunned based on the following criteria (Most important first):
+
+- Cross Track Error (CTE)
+- CTE and SPEED and STEERING
+- Orientation (PSI)
+- Change in speed between steps
+
+The time horizon is 1 second, assuming 100ms per step, thus, N=10.
+Originally, a 1.5 second horizon was proposed (N=15), however, sometimes
+calculations didn´t run on time and car went out of track.
+
+Latency was dealt with assuming that the actuator hasn´t changed, thus
+evaluating with previous ones. (For any not first step).
+
+A video of the result can be found [here](https://youtu.be/pm7aa6-aBxA)
+
+
+## Original README:
 ---
 
 ## Dependencies
