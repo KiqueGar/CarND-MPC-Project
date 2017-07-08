@@ -85,7 +85,7 @@ int main() {
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
     string sdata = string(data).substr(0, length);
-    cout << sdata << endl;
+    //cout << sdata << endl;
     if (sdata.size() > 2 && sdata[0] == '4' && sdata[1] == '2') {
       string s = hasData(sdata);
       if (s != "") {
@@ -120,17 +120,42 @@ int main() {
           for(int i = 0; i<ptsx.size(); i++){
             double diff_x = ptsx[i]-px;
             double diff_y = ptsy[i]-py;
-            waypoints_x.push_back(diff_x*cos(-psi) - diff_x*sin(-psi));
-            waypoints_y.push_back(diff_x*sin(-psi) - diff_x*cos(-psi));
+            waypoints_x.push_back(diff_x*cos(-psi) - diff_y*sin(-psi));
+            waypoints_y.push_back(diff_x*sin(-psi) + diff_y*cos(-psi));
           }
+          //Eigen Map requires pointer to work, hence:
+          double* pointer_x =&waypoints_x[0];
+          double* pointer_y =&waypoints_y[0];
+          Eigen::Map<Eigen::VectorXd> scatter_x(pointer_x,6);
+          Eigen::Map<Eigen::VectorXd> scatter_y(pointer_y,6);
+          
+          //Get regression
+          //Using polynomial grade 3
+          auto coeffs = polyfit (scatter_x, scatter_y, 3);
+          //std::cout << coeffs << endl;
+          double cte = polyeval(coeffs, 0);
+          double epsi = - atan(coeffs[1]);
+          //std::cout << "Cte, epsi:\t" << cte <<"\t" << epsi << endl;
 
           double steer_value;
           double throttle_value;
+          steer_value = j[1]["steering_angle"];
+          throttle_value = j[1]["throttle"];
+          
+
+          Eigen::VectorXd current_state(6);
+          current_state << 0,0,0,v,cte,epsi;
+          vector<double> solution = mpc.Solve(current_state, coeffs);
+          //std::cout << "Actuators:" << endl;
+          //print_vector(actuators);
+          steer_value = solution[0];
+          throttle_value = solution[1];
+          
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
-          msgJson["steering_angle"] = steer_value;
+          msgJson["steering_angle"] = steer_value/(deg2rad(25));
           msgJson["throttle"] = throttle_value;
 
           //Display the MPC predicted trajectory 
@@ -139,6 +164,12 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
+          for (int i =2; i<solution.size(); i++){
+            if(i%2 ==0){
+              mpc_x_vals.push_back(solution[i]);
+            }
+            else{mpc_y_vals.push_back(solution[i]);}
+          }
 
           msgJson["mpc_x"] = mpc_x_vals;
           msgJson["mpc_y"] = mpc_y_vals;
@@ -149,15 +180,16 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
+          for (int i=0; i<75; i+=3 ){
+            next_x_vals.push_back(i);
+            next_y_vals.push_back(polyeval(coeffs, i));
+          }
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
 
-          msgJson["next_x"] = waypoints_x;
-          msgJson["next_y"] = waypoints_y;
-
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+         // std::cout << msg << std::endl;
           // Latency
           // The purpose is to mimic real driving conditions where
           // the car does actuate the commands instantly.

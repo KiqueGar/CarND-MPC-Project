@@ -9,7 +9,7 @@ using CppAD::AD;
 
 // TODO: Set the timestep length and duration
 // Using 1.5 seconds
-size_t N = 15;
+size_t N = 10;
 double dt = .1;
 
 // This value assumes the model presented in the classroom is used.
@@ -24,7 +24,7 @@ double dt = .1;
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
 // Speed setpoint 50mph
-double ref_v = 50;
+double ref_v = 80;
 // Quick indices
 size_t x_start = 0;
 size_t y_start = x_start + N;
@@ -50,21 +50,21 @@ class FG_eval {
     fg[0]=0;
     //Cost inreference state
     for (int t=0; t< N; t++){
-      fg[0] += CppAD::pow(vars[cte_start + t], 2);
-      fg[0] += CppAD::pow(vars[epsi_start + t], 2);
-      fg[0] += CppAD::pow(vars[v_start + t]-ref_v, 2);
+      fg[0] += 5500*CppAD::pow(vars[cte_start + t], 2);
+      fg[0] += 3000*CppAD::pow(vars[epsi_start + t], 2);
+      fg[0] += 20*CppAD::pow(vars[v_start + t]-ref_v, 2);
     }
     //Minimize Use of actuators
     for (int t =0; t<N-1; t++){
-      fg[0] += CppAD::pow(vars[delta_start +t], 2);
-      fg[0] += CppAD::pow(vars[a_start +t], 2);
+      fg[0] += 100*CppAD::pow(vars[delta_start +t], 2);
+      fg[0] += 50*CppAD::pow(vars[a_start +t], 2);
       //Penalize high speed and high turn
-      fg[0] += CppAD::pow(vars[delta_start + t]*vars[v_start + t],2);
+      fg[0] += 3500*CppAD::pow(vars[delta_start + t]*vars[v_start + t]*vars[cte_start],2);
     }
     //Minimize gap between steps
     for (int t=0; t<N-2; t++){
-      fg[0] += CppAD::pow(vars[delta_start + t + 1] - vars[delta_start +t], 2);
-      fg[0] += CppAD::pow(vars[a_start +t +1] - vars[a_start + t + 1], 2);
+      fg[0] += 1000*CppAD::pow(vars[delta_start + t + 1] - vars[delta_start +t], 2);
+      fg[0] += 50*CppAD::pow(vars[a_start +t +1] - vars[a_start + t + 1], 2);
     }
     //Bumping indices for values
     fg[1 + x_start] = vars[x_start];
