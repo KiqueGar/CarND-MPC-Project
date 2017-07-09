@@ -12,17 +12,18 @@ complete a lap around the track safely
 
 ### Model Description
 The kinematic model of the vehicle includes the position, orientation, speed,
-cross track error see the following equations:
+cross track error see the following equations (MPC.ccp Lines: 105-123):
 ![equations](equations.png)
 
 Important to note:
 
 - Actuators are taken into acount for a next step.
-- The equations are for car position, hence, global position (as delivered by
-simulator) must be converted
+- The equations for next step are evaluated from car position, hence, global position
+(as delivered by simulator) must be converted (main.cpp: Lines 112-117), this simplifies
+polynomial fitting latter.
 
 Cost functions were tunned based on the following criteria (Most important first):
-
+(MPC.cpp: Lines 51-68)
 - Cross Track Error (CTE)
 - CTE and SPEED and STEERING
 - Orientation (PSI)
@@ -30,10 +31,13 @@ Cost functions were tunned based on the following criteria (Most important first
 
 The time horizon is 1 second, assuming 100ms per step, thus, N=10.
 Originally, a 1.5 second horizon was proposed (N=15), however, sometimes
-calculations didn´t run on time and car went out of track.
+calculations didn´t run on time and car went out of track. (MPC.cpp: Lines 12,13)
 
 Latency was dealt with assuming that the actuator hasn´t changed, thus
-evaluating with previous ones. (For any not first step).
+evaluating with previous ones. (For any not first step). (MPC.cpp: Lines 99-102)
+
+Polynomial fitting was done stablishing origin at car position, thus, the position
+points from the solution are already in car position and can be fed direclty (main.cpp Lines 159-178)
 
 A video of the result can be found [here](https://youtu.be/pm7aa6-aBxA)
 
